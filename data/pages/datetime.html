@@ -1,0 +1,421 @@
+<header class="topbar">
+    <div class="topbar-left">
+        <h2 id="pageTitle">Tarih ve Saat Ayarları</h2>
+        <span class="breadcrumb">Ana Sayfa / Tarih-Saat</span>
+    </div>
+    <div class="topbar-right">
+        <div class="datetime-display">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            <span id="currentDateTime">--:--:--</span>
+        </div>
+        <button class="notification-btn" id="notificationBtn">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span class="notification-badge" id="notificationCount">0</span>
+        </button>
+    </div>
+</header>
+
+<div class="dashboard-container">
+    <div class="status-card">
+        <div class="page-header">
+            <h1>🕒 Tarih ve Saat Ayarları</h1>
+            <p class="page-description">dsPIC33EP işlemcisinden sistem saatini okuyun veya manuel olarak tarih-saat ayarlayın.</p>
+        </div>
+        
+        <div id="message-container"></div>
+
+        <!-- Mevcut Tarih-Saat Durumu -->
+        <div class="status-section">
+            <div class="section-header">
+                <h3>📊 Mevcut Sistem Saati</h3>
+                <div class="section-controls">
+                    <button class="btn primary" id="getDateTimeBtn">
+                        <span class="btn-icon">📥</span>
+                        <span class="btn-text">Sistem Saatini Çek</span>
+                    </button>
+                    <button class="btn info" id="refreshDateTimeBtn">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">Yenile</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="datetime-status">
+                <div class="status-item">
+                    <div class="status-icon">📅</div>
+                    <div class="status-label">Tarih</div>
+                    <div id="currentDate" class="status-value">--/--/--</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon">🕐</div>
+                    <div class="status-label">Saat</div>
+                    <div id="currentTime" class="status-value">--:--:--</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon">📡</div>
+                    <div class="status-label">Son Güncelleme</div>
+                    <div id="lastUpdate" class="status-value">Henüz çekilmedi</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon">💾</div>
+                    <div class="status-label">Ham Veri</div>
+                    <div id="rawData" class="status-value raw-data">Bekleniyor...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manuel Tarih-Saat Ayarlama -->
+        <div class="settings-section">
+            <h3 class="section-title">🛠️ Manuel Tarih-Saat Ayarlama</h3>
+            <p class="page-description" style="margin-bottom: 1rem;">
+                dsPIC33EP işlemcisine manuel olarak tarih ve saat gönderin. Her iki alan da doldurulmalıdır.
+            </p>
+            
+            <form id="datetimeForm" class="settings-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manualDate" class="required">Tarih Ayarlama</label>
+                        <input type="date" 
+                               id="manualDate" 
+                               name="manualDate" 
+                               required 
+                               min="2020-01-01" 
+                               max="2099-12-31">
+                        <small class="form-help">Gönderilecek format: DDMMYY (örn: 270233)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="manualTime" class="required">Saat Ayarlama</label>
+                        <input type="time" 
+                               id="manualTime" 
+                               name="manualTime" 
+                               required 
+                               step="1">
+                        <small class="form-help">Gönderilecek format: HHMMSS (örn: 112233)</small>
+                    </div>
+                </div>
+
+                <!-- Önizleme -->
+                <div class="preview-section" id="previewSection" style="display: none;">
+                    <h4>📋 Gönderilecek Komutlar Önizlemesi</h4>
+                    <div class="command-preview">
+                        <div class="command-item">
+                            <span class="command-label">Saat Komutu:</span>
+                            <code id="timeCommand" class="command-code">------c</code>
+                        </div>
+                        <div class="command-item">
+                            <span class="command-label">Tarih Komutu:</span>
+                            <code id="dateCommand" class="command-code">------f</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn secondary" id="previewBtn">
+                        <span class="btn-text">👁️ Önizleme</span>
+                    </button>
+                    <button type="submit" class="btn primary" id="setDateTimeBtn">
+                        <span class="btn-text">📤 Tarih-Saat Ayarla</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                    <button type="reset" class="btn danger" id="resetFormBtn">
+                        <span class="btn-text">🔄 Temizle</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Hızlı Ayarlar -->
+        <div class="settings-section">
+            <h3 class="section-title">⚡ Hızlı Ayarlar</h3>
+            <div class="quick-actions">
+                <button type="button" class="btn info quick-btn" id="setCurrentBtn">
+                    <span class="btn-icon">🕐</span>
+                    <span class="btn-text">Şimdiki Zamanı Ayarla</span>
+                </button>
+                <button type="button" class="btn warning quick-btn" id="syncWithESP32Btn">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text">ESP32 Saati ile Senkronize Et</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Komut Geçmişi -->
+        <div class="history-section" id="historySection" style="display: none;">
+            <h3 class="section-title">📜 Komut Geçmişi</h3>
+            <div class="command-history" id="commandHistory">
+                <!-- JavaScript ile doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Bilgi Kutuları -->
+        <div class="info-box">
+            <h4>💡 Komut Formatları</h4>
+            <div class="command-format-info">
+                <div class="format-item">
+                    <strong>Saat Ayarlama:</strong> <code>HHMMSSc</code> 
+                    <span class="format-example">Örnek: 11:22:33 → <code>112233c</code></span>
+                </div>
+                <div class="format-item">
+                    <strong>Tarih Ayarlama:</strong> <code>DDMMYYf</code> 
+                    <span class="format-example">Örnek: 27/02/2033 → <code>270233f</code></span>
+                </div>
+                <div class="format-item">
+                    <strong>Tarih-Saat Okuma:</strong> <code>D</code>
+                    <span class="format-example">Yanıt: <code>D:22/02/25 11:22:33</code></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ Önemli Uyarılar</h4>
+            <ul>
+                <li>Tarih formatı: DD/MM/YY (2 haneli yıl kullanılır)</li>
+                <li>Saat formatı: 24 saat dilimi (00:00-23:59)</li>
+                <li>Her iki komut da dsPIC33EP tarafından onaylanmalıdır</li>
+                <li>Yanlış tarih/saat ayarlaması sistem işleyişini etkileyebilir</li>
+                <li>Önemli işlemler öncesi mevcut saati yedeklemeyi unutmayın</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+/* DateTime sayfası özel stilleri */
+.datetime-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.datetime-status .status-item {
+    background: var(--bg-primary);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-primary);
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.datetime-status .status-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.datetime-status .status-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.datetime-status .status-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.datetime-status .status-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+.datetime-status .status-value.raw-data {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    word-break: break-all;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.preview-section {
+    background: var(--bg-secondary);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin: var(--spacing-lg) 0;
+    border: 1px solid var(--border-primary);
+}
+
+.preview-section h4 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.command-preview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.command-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-secondary);
+}
+
+.command-label {
+    min-width: 100px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.command-code {
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--primary);
+    border: 1px solid var(--border-primary);
+    min-width: 80px;
+    text-align: center;
+}
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.quick-btn {
+    flex: 1;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.history-section {
+    background: var(--bg-secondary);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin: var(--spacing-lg) 0;
+    border: 1px solid var(--border-primary);
+}
+
+.command-history {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+}
+
+.history-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-primary);
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.history-entry:last-child {
+    border-bottom: none;
+}
+
+.history-time {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+}
+
+.history-command {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.history-status {
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.history-status.success {
+    background: rgba(72, 187, 120, 0.2);
+    color: var(--success);
+}
+
+.history-status.error {
+    background: rgba(245, 101, 101, 0.2);
+    color: var(--error);
+}
+
+.command-format-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.format-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary);
+}
+
+.format-item strong {
+    color: var(--text-primary);
+}
+
+.format-item code {
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', monospace;
+    color: var(--primary);
+}
+
+.format-example {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .datetime-status {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .command-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .command-label {
+        min-width: auto;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-btn {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .format-item {
+        padding: var(--spacing-md);
+    }
+}
+</style>

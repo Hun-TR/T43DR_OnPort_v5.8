@@ -1,0 +1,64 @@
+<header class="topbar">
+    <div class="topbar-left">
+        <h2 id="pageTitle">UART BaudRate Ayarları</h2>
+        <span class="breadcrumb">Ana Sayfa / BaudRate</span>
+    </div>
+    <div class="topbar-right">
+        <div class="datetime-display">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            <span id="currentDateTime">--:--:--</span>
+        </div>
+        <button class="notification-btn" id="notificationBtn">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span class="notification-badge" id="notificationCount">0</span>
+        </button>
+    </div>
+</header>
+<div class="dashboard-container">
+    <div class="status-card">
+        <div class="page-header">
+            <h1>⚙️ UART BaudRate Ayarları</h1>
+            <p class="page-description">Arka port (dsPIC33EP) ile olan seri iletişim hızını ayarlayın.</p>
+        </div>
+        <div id="message-container"></div>
+        <div class="status-section">
+            <h3>📊 Mevcut İletişim Durumu</h3>
+            <div class="status-grid small">
+                <div class="status-item compact"><span class="label">Aktif BaudRate:</span><span id="currentBaudRate" class="value highlight">Yükleniyor...</span></div>
+                <div class="status-item compact"><span class="label">İletişim Durumu:</span><span id="commStatus" class="value status-badge">Test ediliyor...</span></div>
+                <div class="status-item compact"><span class="label">Son Değişiklik:</span><span id="lastChange" class="value">Yükleniyor...</span></div>
+            </div>
+        </div>
+        <form id="baudrateForm" class="settings-form">
+            <div class="settings-section">
+                <h3 class="section-title">🔧 BaudRate Seçimi</h3>
+                <div class="baudrate-options">
+                    <div class="radio-group">
+                        <div class="radio-item"><input type="radio" id="baud_9600" name="baud" value="9600"><label for="baud_9600"><span class="radio-custom"></span><span class="radio-text">9600 bps</span><span class="radio-desc">Düşük hız - Uzun mesafe</span></label></div>
+                        <div class="radio-item"><input type="radio" id="baud_19200" name="baud" value="19200"><label for="baud_19200"><span class="radio-custom"></span><span class="radio-text">19200 bps</span><span class="radio-desc">Orta hız - Kararlı iletişim</span></label></div>
+                        <div class="radio-item"><input type="radio" id="baud_38400" name="baud" value="38400"><label for="baud_38400"><span class="radio-custom"></span><span class="radio-text">38400 bps</span><span class="radio-desc">Hızlı - Çoğu uygulama için ideal</span></label></div>
+                        <div class="radio-item"><input type="radio" id="baud_57600" name="baud" value="57600"><label for="baud_57600"><span class="radio-custom"></span><span class="radio-text">57600 bps</span><span class="radio-desc">Yüksek hız - Kısa mesafe</span></label></div>
+                        <div class="radio-item"><input type="radio" id="baud_115200" name="baud" value="115200"><label for="baud_115200"><span class="radio-custom"></span><span class="radio-text">115200 bps</span><span class="radio-desc">Maksimum hız - Kablo kalitesi önemli</span></label></div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn primary" id="saveBaudBtn"><span class="btn-text">⚙️ BaudRate'i Değiştir</span><div class="btn-loader"></div></button>
+                <button type="button" class="btn secondary" id="testBaudBtn">🔍 İletişimi Test Et</button>
+            </div>
+        </form>
+        <div class="warning-box">
+            <h4>⚠️ Dikkat</h4>
+            <ul>
+                <li><strong>BaudRate değişikliği anında uygulanır</strong> ve arka port ile iletişimin kesilmesine neden olabilir</li>
+                <li>Her iki cihazın da aynı hızı desteklediğinden emin olun</li>
+                <li>Değişiklikten sonra sistem otomatik olarak yeni hızda iletişim kurmaya çalışacaktır</li>
+                <li>Sorun yaşanması durumunda cihazı yeniden başlatmayı deneyin</li>
+            </ul>
+        </div>
+        <div id="testResults" class="test-results" style="display: none;">
+            <h4>🔍 İletişim Test Sonuçları</h4>
+            <div id="testContent"></div>
+        </div>
+    </div>
+</div>
